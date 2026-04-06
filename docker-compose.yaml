@@ -1,0 +1,61 @@
+services:
+  ####### auth #######
+  db_auth:
+    image: 'postgres:17'
+    container_name: db-auth
+    ports:
+      - "5433:5432"
+    env_file:
+      - auth/.env
+    volumes:
+      - ./data/auth:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  auth_backend:
+    container_name: auth-backend
+    build:
+      context: ./auth
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+    volumes:
+      - ./auth/myapp:/opt/myapp
+    ports:
+      - "8001:8001"
+    depends_on:
+      db_auth:
+        condition: service_healthy
+
+  ###### catalog ######
+  db_catalog:
+    image: 'postgres:17'
+    container_name: db-catalog
+    ports:
+      - "5434:5432"
+    env_file:
+      - catalog/.env
+    volumes:
+      - ./data/catalog:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  catalog_backend:
+    container_name: catalog-backend
+    build:
+      context: ./catalog
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+
+    volumes:
+      - ./catalog/myapp:/opt/myapp
+    ports:
+      - "8002:8002"
+    depends_on:
+      db_catalog:
+        condition: service_healthy
