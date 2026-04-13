@@ -1,5 +1,7 @@
 from typing import Protocol
 
+from pydantic import EmailStr
+
 from myapp.application.dto.user import UserID, UserCreate, UserData
 
 
@@ -10,3 +12,6 @@ class UserSaver(Protocol):
 class UserReader(Protocol):
     async def read_one(self, user_id: UserID) -> UserData: ...
 
+
+class UserReaderEmail(UserReader):
+    async def read_by_email(self, email: EmailStr) -> UserData: ...

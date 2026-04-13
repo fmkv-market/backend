@@ -1,10 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+
+from myapp.application.dto.base import BaseDTO
 
 
 class User(BaseModel):
-    name: str
     phone: str
-    email: str
+    email: EmailStr
 
 
 class UserCreate(User):
@@ -17,3 +18,6 @@ class UserID(BaseModel):
 class UserData(User):
     id: int
 
+class EmailLogin(BaseDTO):
+    email: EmailStr
+    password: str
