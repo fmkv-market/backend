@@ -45,3 +45,18 @@ async def register_user_by_email(
     return user
 
 
+@router.post("/login_email", summary="Авторизация пользователя через почту")
+async def login_user_by_email(
+        login_executor: FromDishka[EmailLoginUser],
+        data: EmailUserRegister,
+        response: Response,
+) -> Response:
+    login_dto = EmailLogin(email=data.email, password=data.password)
+    try:
+        jwt = await login_executor.login_user(login_dto)
+    except UserEmailNotFoundException:
+        raise UserEmailNotExistsHTTPException
+    except PasswordValidationException:
+        raise IncorrectPasswordHTTPException
+    response.set_cookie("access_token", jwt.value)
+    return Response(status_code=200)
