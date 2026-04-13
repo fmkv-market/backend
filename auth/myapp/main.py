@@ -4,11 +4,21 @@ from pathlib import Path
 from fastapi import FastAPI
 import uvicorn
 
+from myapp.controllers.api import router
+from myapp.infrastructure.ioc.dependencies import init_di
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 
-app = FastAPI()
+def get_fastapi_app() -> FastAPI:
+    fastapi_app = FastAPI()
+
+    fastapi_app.include_router(router)
+
+    return fastapi_app
+
+app = get_fastapi_app()
+init_di(app=app)
 
 
 if __name__ == "__main__":

@@ -15,10 +15,6 @@ class UserModel(Base):
         primary_key=True,
         autoincrement=True,
     )
-    username: Mapped[str] = mapped_column(
-        CITEXT,
-        unique=True,
-    )
 
     email: Mapped[str] = mapped_column(
         CITEXT,
@@ -27,13 +23,8 @@ class UserModel(Base):
 
     phone: Mapped[str] = mapped_column(
         String,
+        nullable=True,
     )
 
-    first_name: Mapped[str] = mapped_column(
-        String,
-    )
-
-    second_name: Mapped[str] = mapped_column(
-        String,
-    )
+    hash_password: Mapped[str] = mapped_column(String(200))
 

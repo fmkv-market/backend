@@ -1,5 +1,8 @@
 from myapp.application.dto.base import BaseDTO
 
 
-class JWT(BaseDTO):
+class JWTData(BaseDTO):
     value: str
+
+class Payload(BaseDTO):
+    id: int

@@ -1,23 +1,10 @@
-from datetime import datetime, timezone, timedelta
-
-import jwt
-
-from myapp.application.dto.jwt import JWT
-from myapp.infrastructure.config import Settings
+from myapp.application.dto.jwt import JWTData
+from myapp.application.interface.jwt_manager import IJWTManager
 
 
 class CreateJWTInteractor:
-    def __init__(self, settings: Settings) -> None:
-        self.expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-        self.secret = settings.JWT_SECRET_KEY
-        self.algorithm = settings.JWT_ALGORITHM
+    def __init__(self, jwt_manager: IJWTManager) -> None:
+        self._jwt_manager = jwt_manager
 
-    async def __call__(self, data: dict) -> JWT:
-        to_encode = data.copy()
-        to_encode |= {"exp": self.expire}
-        encoded_jwt = jwt.encode(
-            to_encode, self.secret, algorithm=self.algorithm
-        )
-        return encoded_jwt
+    async def __call__(self, data: dict) -> JWTData:
+        return self._jwt_manager.create_jwt(data)

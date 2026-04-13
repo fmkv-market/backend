@@ -1,13 +1,10 @@
-import jwt
-
-from myapp.infrastructure.config import Settings
-
+from myapp.application.dto.jwt import JWTData
+from myapp.application.interface.jwt_manager import IJWTManager
 
 class DecodeJWTInteractor:
-    def __init__(self, settings: Settings):
-        self.secret = settings.JWT_SECRET_KEY
-        self.algorithms = [settings.JWT_ALGORITHM]
+    def __init__(self, jwt_manager: IJWTManager):
+        self._jwt_manager = jwt_manager
 
 
-    async def __call__(self, token: str | None) -> dict[str, str]:
-        return jwt.decode(token, self.secret, algorithms=self.algorithms)
+    async def __call__(self, token: JWTData) -> dict[str, str]:
+        return self._jwt_manager.read_jwt(token)

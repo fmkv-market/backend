@@ -1,8 +1,11 @@
+from typing import TypeVar
+
 from pydantic import BaseModel
 
 from myapp.infrastructure.database import Base
-from myapp.infrastructure.hints import B_DTO
 
+
+B_DTO = TypeVar("B_DTO", bound="BaseDTO")
 
 class BaseDTO(BaseModel):
 

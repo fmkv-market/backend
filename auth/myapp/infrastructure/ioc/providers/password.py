@@ -1,16 +1,12 @@
 from dishka import provide, Provider, Scope, AnyOf
 
-from myapp.application.interface.jwt_manager import IJWTManager
 from myapp.application.interface.pass_manager import IPasswordManager
 from myapp.application.interface.user import UserReader, UserReaderEmail, UserSaver
-from myapp.application.services.jwt_manager import JWTManager
 from myapp.application.services.pass_manager import PasswordManager
 from myapp.infrastructure.gateways.user import UserGateway
 
 
-class JWTManagerProvider(Provider):
-    jwt_manager = provide(
-        JWTManager,
-        scope=Scope.APP,
-        provides=IJWTManager
-    )
+class PasswordManagerProvider(Provider):
+    @provide(scope=Scope.APP)
+    def get_password_manager(self) -> IPasswordManager:
+        return PasswordManager()
