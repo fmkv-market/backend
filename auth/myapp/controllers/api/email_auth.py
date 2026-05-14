@@ -2,20 +2,25 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Response
 
-from myapp.application.dto.jwt import JWTData
-from myapp.application.dto.user import UserCreate, EmailLogin, UserData
+from myapp.application.dto.user import UserCreate, EmailLogin, UserData, EmailVerifyDTO
 from myapp.application.exception.password import PasswordValidationException
 from myapp.application.exception.user import UserEmailAlreadyExistsException, UserEmailNotFoundException
 from myapp.application.interactor.login_user import EmailLoginUser
 from myapp.application.interactor.register_user import EmailRegisterUser
 from myapp.application.interface.pass_manager import IPasswordManager
 
-from myapp.application.services.pass_manager import PasswordManager
 from myapp.controllers.exceptions import UserEmailAlreadyExistsHTTPException, UserEmailNotExistsHTTPException, \
-    IncorrectPasswordHTTPException
-from myapp.controllers.schemas.email import EmailUserRegister
+    IncorrectPasswordHTTPException, OTPInvalidHTTPException
+from myapp.controllers.schemas.email import EmailUserRegister, EmailVerify
 
 router = APIRouter(prefix="/email", tags=["Авторизация и аутентификация"], route_class=DishkaRoute)
+from logiro import setup_logger, LogConfig
+
+setup_logger(LogConfig(level=20, json_enabled=True))
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register_email", summary="Регистрация пользователя через почту")
@@ -23,6 +28,7 @@ async def register_user_by_email(
         register_executor: FromDishka[EmailRegisterUser],
         login_executor: FromDishka[EmailLoginUser],
         pass_manager: FromDishka[IPasswordManager],
+
         data: EmailUserRegister,
         response: Response,
 ) -> UserData:
@@ -37,10 +43,13 @@ async def register_user_by_email(
     login_dto = EmailLogin(email=data.email, password=data.password)
     try:
         jwt = await login_executor.login_user(login_dto)
+
     except UserEmailNotFoundException:
         raise UserEmailNotExistsHTTPException
     except PasswordValidationException:
         raise IncorrectPasswordHTTPException
+    logger.info("Пользователь создан")
+
     response.set_cookie("access_token", jwt.value)
     return user
 
@@ -49,14 +58,27 @@ async def register_user_by_email(
 async def login_user_by_email(
         login_executor: FromDishka[EmailLoginUser],
         data: EmailUserRegister,
-        response: Response,
 ) -> Response:
     login_dto = EmailLogin(email=data.email, password=data.password)
     try:
-        jwt = await login_executor.login_user(login_dto)
+        await login_executor.request_login(login_dto)
     except UserEmailNotFoundException:
         raise UserEmailNotExistsHTTPException
     except PasswordValidationException:
         raise IncorrectPasswordHTTPException
+    return Response(status_code=200)
+
+
+@router.post("/verify-email", summary="Подтверждение email")
+async def verify_email(
+        login_executor: FromDishka[EmailLoginUser],
+        data: EmailVerify,
+        response: Response,
+) -> Response:
+    verify_dto = EmailVerifyDTO(email=data.email, otp=data.code)
+    try:
+        jwt = await login_executor.verify_email(verify_dto)
+    except OTPInvalidHTTPException:
+        raise OTPInvalidHTTPException
     response.set_cookie("access_token", jwt.value)
     return Response(status_code=200)

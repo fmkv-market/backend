@@ -1,0 +1,178 @@
+[project]
+name = "logiro"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nazar", email = "korchizhinskiy@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "structlog>=25.4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[[tool.uv.index]]
+name = "gitlab"
+url = "http://git.cifra-k.ru/api/v4/projects/707/packages/pypi/simple"
+publish-url = "http://git.cifra-k.ru/api/v4/projects/707/packages/pypi"
+explicit = true
+
+[[tool.uv.index]]
+name = "mirror"
+url = "http://10.225.128.196:3141/root/pypi/+simple/"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
+
+[tool.pyright]
+venv = ".venv"
+venvPath = "."
+include = [
+    "src/logiro",
+]
+executionEnvironments = [
+  { root = "src" },
+  { root = "tests", extraPaths = ["src"] }
+]
+defineConstant = { DEBUG = true }
+
+reportMissingImports = true
+reportMissingTypeStubs = true
+keywordArgShortcutIllegal = false
+pythonVersion = "3.13.3"
+pythonPlatform = "Linux"
+
+[tool.ruff]
+line-length = 120
+select = [
+ "F", # Pyflakes
+ "E", # Pycodestyle | Error
+ "W", # Pycodestyle | Warning
+ "C90", # Mccabe
+ "I", # Isort
+ "N", # Pep8 naming
+ "D", # Pydocstyle
+ "UP", # Pyupgrade
+ "YTT", # flake8-2020
+ "ANN", # flake8-annotations
+ "ASYNC", # flake8-async
+ "S", # flake8-bandit
+ "BLE", # flake8-blind-except
+ "FBT", # flake8-boolean-trap
+ "B", # flake8-bugbear
+ "A", # flake8-builtins
+ "COM", # flake8-commas
+ "CPY", # flake8-copyright
+ "C4", # flake8-comprehensions
+ "DTZ", # flake8-datetimez
+ "T10", # flake8-debugger
+ "DJ", # flake8-django
+ "EM", # flake8-errmsg
+ "EXE", # flake8-executable
+ "FA", # flake8-future-annotations
+ "ISC", # flake8-implicit-str-concat
+ "ICN", # flake8-import-conventions
+ "G", # flake8-logging-format
+ "INP", # flake8-no-pep420
+ "PIE", # flake8-pie
+ "T20", # flake8-print
+ "PYI", # flake8-pyi
+ "PT", # flake8-pytest-style
+ "Q", # flake8-quotes
+ "RSE", # flake8-raise
+ "RET", # flake8-return
+ "SLF", # flake8-self
+ "SLOT", # flake8-slots
+ "SIM", # flake8-simplify
+ "TID", # flake8-tidy-imports
+ "TCH", # flake8-type-checking
+ "INT", # flake8-gettext
+ "ARG", # flake8-unused-arguments
+ "PTH", # flake8-use-pathlib
+ "TD", # flake8-todos
+ "FIX", # flake8-fixme
+ "ERA", # eradicate
+ "PD", # pandas-vet
+ "PGH", # pygrep-hooks
+ "PL", # Pylint
+ "TRY", # tryceratops
+ "FLY", # flynt
+ "NPY", # NumPy-specific rules
+ "AIR", # Airflow
+ "PERF", # Perflint
+ "FURB", # refurb
+ "LOG", # flake8-logging
+ "RUF", # Ruff-specific rules
+]
+
+fixable = ["ALL"]
+
+ignore = [
+  "D100", # Missing docstring in public module
+  "D101", # Missing docstring in public class
+  "D102", # Missing docstring in public method
+  "D103", # Missing docstring in public function
+  "D104", # Missing docstring in public package
+  "D105", # Missing docstring in magic method
+  "D106", # Missing docstring in public nested class
+  "D107", # Missing docstring in __init__
+  "D212", # Multi-line docstring summary should start at the first line
+  "ANN101", # Missing type annotation for `self` in method
+  "D203", # 1 blank line required before class docstring
+  "ANN101", # Missing type annotation for `self` in method
+  "ANN102", # Missing type annotation for `cls` in classmethod
+  "FIX002", # Line contains TODO, consider resolving the issue
+  "TD002",  # Missing author in TODO; try: `# TODO(<author_name>)
+  "TD003", # Missing issue link on the line following this TODO
+  "TRY003", # Avoid specifying long messages outside the exception class
+  "EM101", # Exception must not use a string literal, assign to variable first
+  ]
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+target-version = "py313"
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.per-file-ignores]
+"**/tests/**/*.py" = [
+    "S101", # Use of `assert` detected
+]
+
+[tool.ruff.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ruff.flake8-gettext]
+function-names = ["_", "gettext", "ngettext", "ugettetxt"]
+
+[tool.pytest.ini_options]
+python_files = ["*_test.py", "*_tests.py", "test_*.py"]
+addopts = "-rA -vvv"

@@ -28,3 +28,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+
+  maildev:
+    image: maildev/maildev
+    environment:
+      - TZ=Asia/Krasnoyarsk
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=1025
+    ports:
+      - 8080:1080
+      - 1025:1025
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"

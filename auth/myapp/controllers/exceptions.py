@@ -22,3 +22,6 @@ class UserEmailNotExistsHTTPException(AuthHTTPException):
 class IncorrectPasswordHTTPException(AuthHTTPException):
     status_code = 401
     detail = "Пароль неверный"
+
+class OTPInvalidHTTPException(AuthHTTPException):
+    status_code = 400

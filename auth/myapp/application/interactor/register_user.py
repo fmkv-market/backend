@@ -17,3 +17,5 @@ class EmailRegisterUser(IRegisterUser):
         except UserEmailNotFoundException:
             pass
         return await self._saver.save(data)
+
+

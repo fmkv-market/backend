@@ -28,6 +28,8 @@ services:
     depends_on:
       db_auth:
         condition: service_healthy
+      rabbit:
+        condition: service_healthy
 
   ###### catalog ######
   db_catalog:
@@ -59,3 +61,56 @@ services:
     depends_on:
       db_catalog:
         condition: service_healthy
+
+  smtp_backend:
+    container_name: smtp-backend
+    build:
+      context: ./smtp
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+
+    volumes:
+      - ./smtp/myapp:/opt/myapp
+    ports:
+      - "8003:8003"
+    depends_on:
+      rabbit:
+        condition: service_healthy
+
+  maildev:
+    image: maildev/maildev
+    environment:
+      - TZ=Asia/Krasnoyarsk
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=1025
+    ports:
+      - 8080:1080
+      - 1025:1025
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq-node
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: my-redis
+    restart: always
+    ports:
+      - "6379:6379"

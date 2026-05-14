@@ -62,3 +62,5 @@ wheels/
 Thumbs.db
 
 */data
+
+rabbitmq

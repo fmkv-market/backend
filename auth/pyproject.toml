@@ -18,4 +18,12 @@ dependencies = [
     "sqlalchemy-citext>=1.8.0",
     "bcrypt>=5.0.0",
     "pwdlib[argon2]>=0.3.0",
+    "logiro>=0.1.0",
+    "faststream[cli,rabbit]>=0.6.7",
+    "dishka-faststream>=0.6.0",
+    "redis>=7.4.0",
 ]
+
+[tool.uv.sources]
+logiro = { path = "./logiro" }
+

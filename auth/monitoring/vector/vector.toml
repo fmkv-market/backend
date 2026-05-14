@@ -1,0 +1,79 @@
+[sources.docker]
+type = "docker_logs"
+docker_host = "/var/run/docker.sock"
+include_containers = [
+  "backend",
+  "celery_worker",
+  "celery_beat",
+  "rabbitmq",
+  "redis",
+  "channel-push",
+]
+
+[sources.pg]
+type = "file"
+read_from = "beginning"
+include = ["/var/lib/postgresql/data/log/*.json"]
+
+[transforms.json]
+type = "remap"
+inputs = ["docker"]
+drop_on_error = true
+source = ".message = object!(parse_json(.message) ?? {})"
+
+[transforms.pg_json]
+type = "remap"
+inputs = ["pg"]
+drop_on_error = true
+source = '''
+original_message = .message
+kvs = parse_json(.message) ?? {}
+
+msg_obj = {}
+
+msg_obj.event = kvs.message
+msg_obj.backend_type = .backend_type
+msg_obj.error_severity = .error_severity
+msg_obj.file = .file
+msg_obj.line_num = .line_num
+msg_obj.pid = .pid
+msg_obj.query_id = .query_id
+msg_obj.session_id = .session_id
+msg_obj.session_start = .session_start
+msg_obj.txid = .txid
+msg_obj.level = downcase(.error_severity) ?? "info"
+
+match = parse_regex(original_message, r'^duration: (?P<duration>\d+(\.\d+)?\s\w+)\s+statement: (?P<query>.+)$') ?? null
+
+if match != null {
+  dur = replace!(match.duration, " ", "")
+  parsed = parse_duration(dur, "ns") ?? null
+
+  if parsed != null {
+    msg_obj.span_event_name = "span"
+    msg_obj.span_kind = "server"
+    msg_obj.span_duration = parsed
+    msg_obj.db_system = "postgresql"
+    msg_obj.db_statement = match.query
+  }
+}
+
+.message = msg_obj
+.source_type = "postgres"
+.container_name = "db"
+'''
+
+[sinks.loki_sync_id]
+type = "loki"
+inputs = ["json", "pg_json"]
+encoding.codec = "json"
+labels.level = "{{ message.level }}"
+labels.container_name = "{{ container_name }}"
+labels.server = "TEST"
+endpoint = "http://loki:3100
+batch.max_bytes = 4194304  # 4mb
+
+[sinks.console]
+type = "console"
+inputs = ["json", "pg_json"]
+encoding.codec = "json"

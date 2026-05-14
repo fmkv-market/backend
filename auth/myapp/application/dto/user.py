@@ -27,3 +27,7 @@ class UserData(User):
 class EmailLogin(BaseDTO):
     email: EmailStr
     password: str
+
+class EmailVerifyDTO(BaseDTO):
+    email: EmailStr
+    otp: str

@@ -1,0 +1,6 @@
+include:
+  - remote: "http://git.cifra-k.ru/platform/ci_templates/-/raw/master/backend/library_build/gitlab-ci.yaml"
+
+stages:
+  - build
+  - deploy
