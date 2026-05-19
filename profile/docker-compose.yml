@@ -1,0 +1,91 @@
+services:
+  db:
+    image: 'postgres:17'
+    container_name: db
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  fmkv_backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+
+    volumes:
+      - ./myapp:/opt/myapp
+      - ./logiro:/opt/logiro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  vector:
+    image: timberio/vector:0.42.0-alpine
+    container_name: vector
+    hostname: vector
+    restart: unless-stopped
+    command: --config=/etc/vector/vector.toml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./monitoring/vector/vector.toml:/etc/vector/vector.toml:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+
+  loki:
+    image: grafana/loki:2.9.6
+    container_name: loki
+    hostname: loki
+    expose:
+      - "3100"
+    volumes:
+      - ./monitoring/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki.data:/tmp/:rw
+    command: -config.file=/etc/loki/config.yaml
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana.data:/var/lib/grafana:rw
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:rw
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DATABASE_WAL=true
+      - VIRTUAL_HOST=grafana
+      - NETWORK_ACCESS=internal
+      - VIRTUAL_PORT=3000
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: my-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass yourpassword --appendonly yes
+    volumes:
+      - redis-data:/data
+
+volumes:
+  loki.data: { }
+  grafana.data: { }
