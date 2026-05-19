@@ -1,13 +1,20 @@
 from myapp.application.dto.user import UserCreate, UserData
+from myapp.application.exception.user import UserEmailAlreadyExistsException, UserEmailNotFoundException
+from myapp.application.interface.profile_publisher import IProfilePublisher
 from myapp.application.interface.register import IRegisterUser
 from myapp.application.interface.user import UserSaver, UserReaderEmail
-from myapp.application.exception.user import UserEmailAlreadyExistsException, UserEmailNotFoundException
 
 
 class EmailRegisterUser(IRegisterUser):
-    def __init__(self, saver: UserSaver, reader: UserReaderEmail):
+    def __init__(
+        self,
+        saver: UserSaver,
+        reader: UserReaderEmail,
+        profile_publisher: IProfilePublisher,
+    ):
         self._saver = saver
         self._reader = reader
+        self._profile_publisher = profile_publisher
 
     async def register_user(self, data: UserCreate) -> UserData:
         try:
@@ -16,6 +23,6 @@ class EmailRegisterUser(IRegisterUser):
                 raise UserEmailAlreadyExistsException
         except UserEmailNotFoundException:
             pass
-        return await self._saver.save(data)
-
-
+        user = await self._saver.save(data)
+        await self._profile_publisher.publish_user_created(user.id)
+        return user

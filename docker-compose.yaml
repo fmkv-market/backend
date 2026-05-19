@@ -53,13 +53,46 @@ services:
       context: ./catalog
       dockerfile: docker/Dockerfile
     entrypoint: bash ./scripts/entrypoint.sh backend
-
+    env_file:
+      - catalog/.env
     volumes:
       - ./catalog/myapp:/opt/myapp
     ports:
       - "8002:8002"
     depends_on:
       db_catalog:
+        condition: service_healthy
+
+  ####### profile #######
+  db_profile:
+    image: 'postgres:17'
+    container_name: db-profile
+    ports:
+      - "5435:5432"
+    env_file:
+      - profile/.env
+    volumes:
+      - ./data/profile:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  profile_backend:
+    container_name: profile-backend
+    build:
+      context: ./profile
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+    volumes:
+      - ./profile/myapp:/opt/myapp
+    ports:
+      - "8004:8004"
+    depends_on:
+      db_profile:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
 
   smtp_backend:
