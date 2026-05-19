@@ -1,0 +1,68 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+
+interface IRegisterUser <<interface>> {
+    + register_user(data: BaseDTO)
+}
+
+interface ILoginUser <<interface>> {
+    + request_login(data: BaseDTO)
+    + verify_email(data: EmailVerifyDTO) : JWTData
+}
+
+interface UserSaver <<protocol>> {
+    + save(user_create: UserCreate) : UserData
+}
+
+interface UserReaderEmail <<protocol>> {
+    + read_by_email(email: EmailStr) : UserData
+}
+
+interface IPasswordManager <<protocol>> {
+    + verify_password(plain, hashed) : bool
+    + hash_password(password: str) : str
+}
+
+interface IJWTManager <<protocol>> {
+    + create_jwt(data: Payload) : JWTData
+    + read_jwt(token: JWTData) : dict
+}
+
+class EmailRegisterUser {
+    - _saver: UserSaver
+    - _reader: UserReaderEmail
+    + register_user(data: UserCreate) : UserData
+}
+
+class EmailLoginUser {
+    - _reader: UserReaderEmail
+    - _pass_manager: IPasswordManager
+    - _jwt_manager: IJWTManager
+    - _publisher: IPublisher
+    - _otp_service: OtpService
+    - _otp_storage: IOTPStorage
+    + request_login(data: EmailLogin)
+    + verify_email(data: EmailVerifyDTO) : JWTData
+}
+
+class AuthProvider <<Abstract Factory>> {
+    + email_register_interactor : IRegisterUser
+    + email_login_interactor : ILoginUser
+}
+
+EmailRegisterUser ..|> IRegisterUser
+EmailLoginUser ..|> ILoginUser
+
+EmailRegisterUser ..> UserSaver
+EmailRegisterUser ..> UserReaderEmail
+
+EmailLoginUser ..> UserReaderEmail
+EmailLoginUser ..> IPasswordManager
+EmailLoginUser ..> IJWTManager
+
+AuthProvider ..> EmailRegisterUser : creates
+AuthProvider ..> EmailLoginUser : creates
+
+@enduml

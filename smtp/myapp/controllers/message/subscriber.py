@@ -16,3 +16,18 @@ async def handle_verify_email(
     print("start")
     await service.send(recipients=[msg["email"]], subject=msg["otp"])
     print("goood")
+
+
+
+@router.subscriber(QueueConfig.sms_queue)
+@faststream_inject
+async def handle_verify_sms(
+    msg: dict,
+    sms_sender: FromDishka[SmsSender],
+    service: FromDishka[NotificationService],
+) -> None:
+    service.set_sender(sms_sender)
+    await service.notify(
+        recipients=[msg["phone"]],
+        message=msg["otp"],
+    )
