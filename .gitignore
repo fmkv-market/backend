@@ -21,7 +21,6 @@ __pycache__
 .idea
 .env
 
-data
 
 # Virtual environments
 .venv/
@@ -60,7 +59,5 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
-
-*/data
 
 rabbitmq

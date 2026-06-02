@@ -16,8 +16,6 @@ __pycache__/
 
 # Data (keep directory, ignore contents)
 data/*
-!data/.gitkeep
-!data/README.md
 
 # Model artifacts / exports
 artifacts/*
