@@ -16,11 +16,10 @@ __pycache__/
 
 # Data (keep directory, ignore contents)
 data/*
-
+!data/.gitkeep
 # Model artifacts / exports
 artifacts/*
 !artifacts/.gitkeep
-
 # Common data formats (just in case)
 *.parquet
 *.pkl
