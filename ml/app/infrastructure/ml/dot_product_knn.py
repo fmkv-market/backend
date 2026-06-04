@@ -2,6 +2,7 @@ from app.core.interfaces.candidate_generator import ICandidateGenerator
 from app.core.interfaces.repositories.item_index import IItemCandidateIndex
 from app.core.interfaces.repositories.user_embeddings import IUserEmbeddingRepository
 from app.domain.entities import Candidate
+from app.core.constants import MOST_POP_ITEMS
 
 
 class IALSCandidateGenerator(ICandidateGenerator):
@@ -21,7 +22,7 @@ class IALSCandidateGenerator(ICandidateGenerator):
     def generate(self, user_id: str, n: int) -> list[Candidate]:
         user_vec = self._user_embeddings.get_user_embedding(user_id)
         if user_vec is None:
-            return []
+            return [Candidate(item_id=item_id) for item_id in MOST_POP_ITEMS]
 
         hits = self._item_index.search(user_vec, n)
         return [
