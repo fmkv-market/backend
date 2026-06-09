@@ -29,6 +29,8 @@ class UserModel(Base):
 
     hash_password: Mapped[str] = mapped_column(String(200))
 
+    is_blocked: Mapped[bool] = mapped_column(default=False)
+
     address_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("addresses.id"), nullable=True
     )

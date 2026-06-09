@@ -4,11 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from myapp.application.dto.profile import ProfileCreate, ProfileData, ProfileUpdate
 from myapp.application.exception.profile import ProfileNotFoundException, ProfileAlreadyExistsException
-from myapp.application.interface.profile import IProfileSaver, IProfileReader, IProfileUpdater
+from myapp.application.interface.profile import IProfileSaver, IProfileReader, IProfileUpdater, IProfileDeleter
 from myapp.infrastructure.models.profile import ProfileModel
 
 
-class ProfileGateway(IProfileSaver, IProfileReader, IProfileUpdater):
+class ProfileGateway(IProfileSaver, IProfileReader, IProfileUpdater, IProfileDeleter):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -55,3 +55,13 @@ class ProfileGateway(IProfileSaver, IProfileReader, IProfileUpdater):
             setattr(profile, field, value)
         await self._session.commit()
         return ProfileData.map_to_domain_entity(profile)
+
+    async def delete_by_user_id(self, user_id: int) -> None:
+        result = await self._session.execute(
+            select(ProfileModel).filter_by(user_id=user_id)
+        )
+        profile = result.scalar_one_or_none()
+        if profile is None:
+            return
+        await self._session.delete(profile)
+        await self._session.commit()

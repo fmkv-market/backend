@@ -10,6 +10,7 @@ from myapp.infrastructure.ioc.providers.otp import OTPProvider
 from myapp.infrastructure.ioc.providers.password import PasswordManagerProvider
 from myapp.infrastructure.ioc.providers.publisher import PublisherProvider
 from myapp.infrastructure.ioc.providers.redis import RedisProvider
+from myapp.infrastructure.ioc.providers.security import SecurityProvider
 from myapp.infrastructure.ioc.providers.settings import SettingsProvider
 from myapp.infrastructure.ioc.providers.users import UserProvider
 
@@ -25,6 +26,7 @@ def init_di(app: FastAPI, broker: RabbitBroker):
         PublisherProvider(),
         OTPProvider(),
         RedisProvider(),
+        SecurityProvider(),
         context={
             RabbitBroker: broker
         },

@@ -19,6 +19,7 @@ class UserID(BaseModel):
 class UserData(User):
     id: int
     hash_password: str
+    is_blocked: bool = False
 
     @classmethod
     def map_to_domain_entity(cls, data):

@@ -14,3 +14,7 @@ class IProfileReader(Protocol):
 
 class IProfileUpdater(Protocol):
     async def update(self, profile_id: int, data: ProfileUpdate) -> ProfileData: ...
+
+
+class IProfileDeleter(Protocol):
+    async def delete_by_user_id(self, user_id: int) -> None: ...

@@ -28,6 +28,7 @@ def get_fastapi_app(lifespan) -> FastAPI:
 async def lifespan(app: FastAPI):
     await broker.start()
     await broker.declare_queue(RabbitQueue(name=QueueConfig.user_created_queue))
+    await broker.declare_queue(RabbitQueue(name=QueueConfig.user_deleted_queue))
     yield
     await broker.stop()
 

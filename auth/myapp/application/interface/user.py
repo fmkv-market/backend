@@ -15,3 +15,15 @@ class UserReader(Protocol):
 
 class UserReaderEmail(UserReader):
     async def read_by_email(self, email: EmailStr) -> UserData: ...
+
+
+class UserDeleter(Protocol):
+    async def delete(self, user_id: int) -> None: ...
+
+
+class UserPasswordUpdater(Protocol):
+    async def update_password(self, user_id: int, hash_password: str) -> None: ...
+
+
+class UserBlockManager(Protocol):
+    async def set_blocked(self, user_id: int, blocked: bool) -> None: ...

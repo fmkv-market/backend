@@ -14,3 +14,7 @@ class UserEmailAlreadyExistsException(UserAlreadyExistsException):
 
 class UserEmailNotFoundException(UserNotFoundException):
     detail = "Пользователя с таким email не существует"
+
+
+class UserBlockedException(Exception):
+    detail = "Учётная запись заблокирована"

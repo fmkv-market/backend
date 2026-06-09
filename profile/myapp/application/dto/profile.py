@@ -5,6 +5,8 @@ from myapp.application.dto.base import BaseDTO
 
 class ProfileCreate(BaseDTO):
     user_id: int
+    first_name: str | None = None
+    last_name: str | None = None
 
 
 class ProfileUpdate(BaseDTO):

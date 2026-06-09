@@ -1,6 +1,6 @@
 from dishka import provide, Provider, Scope, AnyOf
 
-from myapp.application.interface.profile import IProfileSaver, IProfileReader, IProfileUpdater
+from myapp.application.interface.profile import IProfileSaver, IProfileReader, IProfileUpdater, IProfileDeleter
 from myapp.infrastructure.gateways.profile import ProfileGateway
 
 
@@ -13,5 +13,6 @@ class ProfileProvider(Provider):
             IProfileSaver,
             IProfileReader,
             IProfileUpdater,
+            IProfileDeleter,
         ],
     )

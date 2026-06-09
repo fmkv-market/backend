@@ -23,5 +23,15 @@ class IncorrectPasswordHTTPException(AuthHTTPException):
     status_code = 401
     detail = "Пароль неверный"
 
+
+class UserNotFoundHTTPException(AuthHTTPException):
+    status_code = 404
+    detail = "Пользователь не найден"
+
+
+class UserBlockedHTTPException(AuthHTTPException):
+    status_code = 403
+    detail = "Учётная запись заблокирована"
+
 class OTPInvalidHTTPException(AuthHTTPException):
     status_code = 400

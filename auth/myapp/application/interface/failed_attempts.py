@@ -1,0 +1,6 @@
+from typing import Protocol
+
+
+class IFailedAttemptsStorage(Protocol):
+    async def increment(self, email: str) -> int: ...
+    async def reset(self, email: str) -> None: ...

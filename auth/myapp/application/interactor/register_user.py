@@ -16,7 +16,12 @@ class EmailRegisterUser(IRegisterUser):
         self._reader = reader
         self._profile_publisher = profile_publisher
 
-    async def register_user(self, data: UserCreate) -> UserData:
+    async def register_user(
+        self,
+        data: UserCreate,
+        first_name: str | None = None,
+        last_name: str | None = None,
+    ) -> UserData:
         try:
             user_exists = await self._reader.read_by_email(email=data.email)
             if user_exists:
@@ -24,5 +29,5 @@ class EmailRegisterUser(IRegisterUser):
         except UserEmailNotFoundException:
             pass
         user = await self._saver.save(data)
-        await self._profile_publisher.publish_user_created(user.id)
+        await self._profile_publisher.publish_user_created(user.id, first_name, last_name)
         return user
