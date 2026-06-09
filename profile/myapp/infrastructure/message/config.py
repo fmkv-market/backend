@@ -2,4 +2,4 @@ from enum import StrEnum
 
 
 class QueueConfig(StrEnum):
-    user_created_queue = "profile.user_created"
+    user_created_queue = "user.created"

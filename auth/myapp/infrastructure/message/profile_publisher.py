@@ -8,4 +8,4 @@ class ProfileMessagePublisher(IProfilePublisher):
         self._broker = broker
 
     async def publish_user_created(self, user_id: int) -> None:
-        await self._broker.publish({"user_id": user_id}, queue="profile.user_created")
+        await self._broker.publish({"user_id": user_id}, queue="user.created")
