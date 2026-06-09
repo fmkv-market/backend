@@ -1,0 +1,1 @@
+from myapp.infrastructure.models.user import UserModel

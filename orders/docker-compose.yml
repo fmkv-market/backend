@@ -1,0 +1,49 @@
+services:
+  db_orders:
+    image: 'postgres:17'
+    container_name: db
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  fmkv_backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+
+    volumes:
+      - ./myapp:/opt/myapp
+    ports:
+      - "8000:8004"
+    depends_on:
+      db_orders:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq-node
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

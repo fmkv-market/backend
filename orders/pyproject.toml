@@ -1,0 +1,14 @@
+[project]
+name = "orders"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosmtplib>=5.1.0",
+    "dishka>=1.10.1",
+    "dishka-faststream>=0.6.0",
+    "fastapi>=0.136.1",
+    "faststream[cli,rabbit]>=0.6.7",
+    "pydantic-settings>=2.14.1",
+    "sqlalchemy>=2.0.49",
+    "uvicorn>=0.46.0",
+]
