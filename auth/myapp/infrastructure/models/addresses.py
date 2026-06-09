@@ -1,12 +1,15 @@
-import uuid
+from __future__ import annotations
 
-from sqlalchemy import func, UUID, CheckConstraint, and_, Integer, String, ForeignKey
+from typing import TYPE_CHECKING
+
+from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import CITEXT
 
 from myapp.application.services.addresses import AddressComponent, AddressLeaf, AddressComposite
 from myapp.infrastructure.database import Base
-from myapp.infrastructure.models import UserModel
+
+if TYPE_CHECKING:
+    from myapp.infrastructure.models.user import UserModel
 
 
 class AddressModel(Base):
@@ -23,12 +26,12 @@ class AddressModel(Base):
     )
 
     # Самореференция: один адрес содержит дочерние адреса
-    children: Mapped[list["AddressModel"]] = relationship(
+    children: Mapped[list[AddressModel]] = relationship(
         "AddressModel",
         back_populates="parent",
         cascade="all, delete-orphan",
     )
-    parent: Mapped["AddressModel" | None] = relationship(
+    parent: Mapped[AddressModel | None] = relationship(
         "AddressModel",
         back_populates="children",
         remote_side="AddressModel.id",

@@ -3,6 +3,7 @@ from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Response
 
 from myapp.application.dto.user import UserCreate, EmailLogin, UserData, EmailVerifyDTO
+from myapp.application.exception.otp import OTPNotFoundException
 from myapp.application.exception.password import PasswordValidationException
 from myapp.application.exception.user import UserEmailAlreadyExistsException, UserEmailNotFoundException, UserBlockedException
 from myapp.application.interactor.delete_user import DeleteUserInteractor
@@ -29,9 +30,7 @@ async def register_user_by_email(
         register_executor: FromDishka[EmailRegisterUser],
         login_executor: FromDishka[EmailLoginUser],
         pass_manager: FromDishka[IPasswordManager],
-
         data: EmailUserRegister,
-        response: Response,
 ) -> UserData:
     hashed_password = await pass_manager.hash_password(data.password)
     register_dto = UserCreate(email=data.email, hash_password=hashed_password)
@@ -43,15 +42,13 @@ async def register_user_by_email(
 
     login_dto = EmailLogin(email=data.email, password=data.password)
     try:
-        jwt = await login_executor.login_user(login_dto)
-
+        await login_executor.request_login(login_dto)
     except UserEmailNotFoundException:
         raise UserEmailNotExistsHTTPException
     except PasswordValidationException:
         raise IncorrectPasswordHTTPException
     logger.info("Пользователь создан")
 
-    response.set_cookie("access_token", jwt.value)
     return user
 
 
@@ -76,28 +73,28 @@ async def login_user_by_email(
 async def verify_email(
         login_executor: FromDishka[EmailLoginUser],
         data: EmailVerify,
-        response: Response,
 ) -> Response:
     verify_dto = EmailVerifyDTO(email=data.email, otp=data.code)
     try:
         jwt = await login_executor.verify_email(verify_dto)
-    except OTPInvalidHTTPException:
+    except OTPNotFoundException:
         raise OTPInvalidHTTPException
-    response.set_cookie("access_token", jwt.value)
-    return Response(status_code=200)
+    resp = Response(status_code=200)
+    resp.set_cookie("access_token", jwt.value, httponly=True, samesite="lax")
+    return resp
 
 
 @router.post("/logout", summary="Выход из системы")
-async def logout(response: Response) -> Response:
-    response.delete_cookie("access_token")
-    return Response(status_code=200)
+async def logout() -> Response:
+    resp = Response(status_code=200)
+    resp.delete_cookie("access_token")
+    return resp
 
 
 @router.delete("/account", summary="Удаление учётной записи (с подтверждением паролем)")
 async def delete_account(
         delete_executor: FromDishka[DeleteUserInteractor],
         data: AccountDelete,
-        response: Response,
 ) -> Response:
     try:
         await delete_executor.execute(email=data.email, password=data.password)
@@ -105,5 +102,6 @@ async def delete_account(
         raise UserEmailNotExistsHTTPException
     except PasswordValidationException:
         raise IncorrectPasswordHTTPException
-    response.delete_cookie("access_token")
-    return Response(status_code=204)
+    resp = Response(status_code=204)
+    resp.delete_cookie("access_token")
+    return resp

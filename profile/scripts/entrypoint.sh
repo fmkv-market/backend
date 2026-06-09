@@ -11,6 +11,6 @@ backend() {
       echo "Skip migrations: alembic.ini not found"
     fi
   fi
-  uvicorn myapp.main:app --proxy-headers --host 0.0.0.0 --port 8001 --reload
+  uvicorn myapp.main:app --proxy-headers --host 0.0.0.0 --port 8004 --reload
 }
 $1

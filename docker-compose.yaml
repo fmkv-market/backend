@@ -95,6 +95,40 @@ services:
       rabbit:
         condition: service_healthy
 
+  ####### orders #######
+  db_orders:
+    image: 'postgres:17'
+    container_name: db-orders
+    ports:
+      - "5436:5432"
+    env_file:
+      - orders/.env
+    volumes:
+      - ./data/orders:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  orders_backend:
+    container_name: orders-backend
+    build:
+      context: ./orders
+      dockerfile: docker/Dockerfile
+    entrypoint: bash ./scripts/entrypoint.sh backend
+    env_file:
+      - orders/.env
+    volumes:
+      - ./orders/myapp:/opt/myapp
+    ports:
+      - "8005:8004"
+    depends_on:
+      db_orders:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+
   smtp_backend:
     container_name: smtp-backend
     build:

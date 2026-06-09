@@ -1,5 +1,5 @@
 from dishka import FromDishka
-from dishka.integrations.faststream import inject as faststream_inject
+from dishka_faststream import inject as faststream_inject
 from faststream.rabbit import RabbitRouter
 
 from myapp.application.dto.profile import ProfileCreate

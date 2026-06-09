@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from myapp.application.dto.base import BaseDTO
 
@@ -18,7 +18,7 @@ class UserID(BaseModel):
 
 class UserData(User):
     id: int
-    hash_password: str
+    hash_password: str = Field(exclude=True)
     is_blocked: bool = False
 
     @classmethod

@@ -3,23 +3,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
+    MODE: Literal["TEST", "LOCAL", "DEV", "PROD"] = "DEV"
 
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_DB: str
+    SMTP_HOST: str = "maildev"
+    SMTP_PORT: int = 1025
+    SMTP_SENDER: str = "root@localhost"
 
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    @property
-    def POSTGRES_URL(self):
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-
-    JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-
-    model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()

@@ -1,0 +1,30 @@
+.env
+.env.*
+
+# Local Python/IDE
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+
+# Virtualenvs
+.venv/
+.venv*/
+
+# Data (keep directory, ignore contents)
+data/*
+!data/.gitkeep
+# Model artifacts / exports
+artifacts/*
+!artifacts/.gitkeep
+# Common data formats (just in case)
+*.parquet
+*.pkl
+*.cbm
+*.index
+
+# Docker volumes
+pgdata/

@@ -1,6 +1,6 @@
 from dishka import FromDishka
-from faststream.rabbit import RabbitRouter
-from dishka.integrations.faststream import inject as faststream_inject
+from faststream.rabbit import RabbitRouter, RabbitQueue
+from dishka_faststream import inject as faststream_inject
 
 from myapp.application.dto.cart import CreateCartDTO
 from myapp.application.dto.item import ItemInfoDTO
@@ -14,7 +14,8 @@ from myapp.infrastructure.message.config import QueueConfig
 
 router = RabbitRouter()
 
-@router.subscriber(QueueConfig.user_created)
+
+@router.subscriber(RabbitQueue(name=QueueConfig.user_created, durable=True))
 @faststream_inject
 async def handle_user_created(
         user_id: int,
@@ -24,7 +25,7 @@ async def handle_user_created(
     await cart_creator.proceed(cart_dto)
 
 
-@router.subscriber(QueueConfig.item_added)
+@router.subscriber(RabbitQueue(name=QueueConfig.item_added, durable=True))
 @faststream_inject
 async def handle_item_added(
         item_request: RequestItemInfo,
@@ -38,7 +39,7 @@ async def handle_item_added(
     await cart_add_item.proceed(item_dto, cart_id=item_request.cart_id)
 
 
-@router.subscriber(QueueConfig.item_removed)
+@router.subscriber(RabbitQueue(name=QueueConfig.item_removed, durable=True))
 @faststream_inject
 async def handle_item_removed(
         item_request: RequestItemInfo,

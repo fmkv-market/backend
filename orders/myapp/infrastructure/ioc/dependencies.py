@@ -1,17 +1,23 @@
 from dishka import make_async_container
-import dishka_faststream as dishka_faststream
+from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
-from faststream.asgi import AsgiFastStream
+from faststream.rabbit import RabbitBroker
 
+from myapp.infrastructure.ioc.providers.cart import CartProvider
 from myapp.infrastructure.ioc.providers.database import DatabaseProvider
+from myapp.infrastructure.ioc.providers.interactors import InteractorProvider
 from myapp.infrastructure.ioc.providers.settings import SettingsProvider
 
 
-def init_di(app: AsgiFastStream):
+def init_di(app: FastAPI, broker: RabbitBroker):
     container = make_async_container(
         SettingsProvider(),
         DatabaseProvider(),
-
+        CartProvider(),
+        InteractorProvider(),
+        context={
+            RabbitBroker: broker,
+        },
     )
-    dishka_faststream.setup_dishka(container=container, app=app)
+    setup_dishka(container=container, app=app)
     return container

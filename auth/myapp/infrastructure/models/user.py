@@ -34,6 +34,6 @@ class UserModel(Base):
     address_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("addresses.id"), nullable=True
     )
-    address: Mapped["AddressModel" | None] = relationship(
+    address: Mapped[AddressModel | None] = relationship(
         "AddressModel", back_populates="users"
     )
